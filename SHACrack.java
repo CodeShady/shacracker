@@ -3,15 +3,20 @@
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import java.nio.file.*;
 import java.nio.charset.StandardCharsets;
+
 import java.math.BigInteger;
 
 import java.io.IOException;
 import java.io.File;
 
+import java.util.Locale;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.Scanner;
+
+import java.text.NumberFormat;
 
 public class SHACrack {
 
@@ -24,6 +29,21 @@ public class SHACrack {
 
 		// Create console colors
 		ConsoleColors color = new ConsoleColors();
+		NumberFormat format = NumberFormat.getInstance(Locale.US);
+
+
+		// Logo
+		String color1 = color.CYAN;
+		String color2 = color.RED;
+
+		String logo = color.RED + "   _____ _    _    "+color1+"      _____                _             \n"
+         + color.RED + "  / ____| |  | |   /\\ "+color1+"  / ____|              | |\n"
+         + color.RED + " | (___ | |__| |  /  \\ "+color1+"| |     _ __ __ _  ___| | _____ _ __\n"
+         + color.RED + "  \\___ \\|  __  | / /\\ \\"+color1+"| |    | '__/ _` |/ __| |/ / _ \\ '__|\n"
+         + color.RED + "  ____) | |  | |/ ____ \\"+color1+" |____| | | (_| | (__|   <  __/ |\n"
+         + color.RED + " |_____/|_|  |_/_/    \\_\\"+color1+"_____|_|  \\__,_|\\___|_|\\_\\___|_|\n";
+
+		System.out.println(logo);
 
 		// Run the setup method to get user input
 		setup(color);
@@ -41,6 +61,11 @@ public class SHACrack {
 	     	int lineCount = 1;
 	     	int lineUpdater = 1;
 
+
+	     	// First get file lines
+			Path path = Paths.get(fileName);
+			long totalLines = Files.lines(path).count();
+
 	     	// Capture the current time for later usage
 	     	long startTime = System.currentTimeMillis();
 
@@ -55,7 +80,7 @@ public class SHACrack {
 	     		if(encrypt256(md, currentLine).equals(hash)) {
 	     			// Get the new time
 	     			long endTime = System.currentTimeMillis();
-	     			long totalTime = (endTime - startTime);
+	     			long totalTime = endTime - startTime;
 
 	     			System.out.println(color.YELLOW + "\n---------- Hash Found ----------");
 
@@ -77,10 +102,12 @@ public class SHACrack {
 	     			break;
 
 	     		} else {
-	     			if (lineUpdater >= 1000) {
+	     			if (lineUpdater >= 10000) {
 	     				// Every 1,000 lines, update the status
 	     				back(100);
-						System.out.print(color.WHITE + color.RED_BACKGROUND + " Currently On Line : " + lineCount + " ");
+	     				progressPercentage(color, (int)lineCount, (int)totalLines);
+	     				System.out.print("  " + color.WHITE + color.RED_BACKGROUND + " " + lineCount + "/" + totalLines +" \r" + color.RESET);
+						// System.out.print(color.WHITE + color.RED_BACKGROUND + " Currently On Line : " + format.format(lineCount) + " ");
 	     				// Reset the updater
 	     				lineUpdater = 0;
 	     			}
@@ -125,6 +152,27 @@ public class SHACrack {
 			System.out.print("\b");
 			back(times-1);
 		}
+	}
+
+	public static void progressPercentage(ConsoleColors color, int remain, int total) {
+	    if (remain > total) {
+	        throw new IllegalArgumentException();
+	    }
+	    int maxBareSize = 10; // 10unit for 100%
+	    int remainProcent = ((100 * remain) / total) / maxBareSize;
+	    char defaultChar = ' ';
+	    String icon = color.GREEN + "#" + color.RESET;
+	    String bare = new String(new char[maxBareSize]).replace('\0', defaultChar) + "]";
+	    StringBuilder bareDone = new StringBuilder();
+	    bareDone.append("[");
+	    for (int i = 0; i < remainProcent; i++) {
+	        bareDone.append(icon);
+	    }
+	    String bareRemain = bare.substring(remainProcent, bare.length());
+	    System.out.print("\r" + bareDone + bareRemain + " " + remainProcent * 10 + "%");
+	    if (remain == total) {
+	        System.out.print("\n");
+	    }
 	}
 
 }

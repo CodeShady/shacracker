@@ -198,7 +198,7 @@ public class SHACrack {
 		// Grab user input
 		Scanner userInput = new Scanner(System.in);
 
-		System.out.print(color.CYAN + "File Name: " + color.RESET);
+		System.out.print(color.CYAN + "Wordlist File: " + color.RESET);
 		fileName = userInput.nextLine();
 
 		if (fileName.contains(" -quick")) {
